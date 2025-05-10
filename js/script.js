@@ -1,8 +1,9 @@
 // Navigation scroll effect
-const nav = document.querySelector('nav');
+const nav = document.querySelector('#main-nav');
 const navLinks = document.querySelectorAll('.nav-links li');
 const burger = document.querySelector('.burger');
 const navLinksContainer = document.querySelector('.nav-links');
+const body = document.body;
 
 // Scroll effect pour la barre de navigation
 window.addEventListener('scroll', () => {
@@ -18,6 +19,9 @@ const navSlide = () => {
     burger.addEventListener('click', () => {
         // Toggle Nav
         navLinksContainer.classList.toggle('nav-active');
+        
+        // Toggle body class for overlay
+        body.classList.toggle('menu-open');
         
         // Burger Animation
         burger.classList.toggle('toggle');
@@ -37,14 +41,36 @@ const navSlide = () => {
 navLinks.forEach(link => {
     link.addEventListener('click', () => {
         if (navLinksContainer.classList.contains('nav-active')) {
-            navLinksContainer.classList.remove('nav-active');
-            burger.classList.remove('toggle');
-            
-            navLinks.forEach(link => {
-                link.style.animation = '';
-            });
+            // Attendre un court instant avant de fermer le menu pour que la navigation se produise
+            setTimeout(() => {
+                navLinksContainer.classList.remove('nav-active');
+                burger.classList.remove('toggle');
+                body.classList.remove('menu-open');
+                
+                navLinks.forEach(link => {
+                    link.style.animation = '';
+                });
+            }, 100);
         }
     });
+});
+
+// Fermer le menu si on clique sur l'overlay (en dehors du menu)
+document.addEventListener('click', (e) => {
+    // Vérifier si le menu est ouvert et si le clic est en dehors du menu et du burger
+    if (
+        body.classList.contains('menu-open') && 
+        !e.target.closest('.nav-links') && 
+        !e.target.closest('.burger')
+    ) {
+        navLinksContainer.classList.remove('nav-active');
+        burger.classList.remove('toggle');
+        body.classList.remove('menu-open');
+        
+        navLinks.forEach(link => {
+            link.style.animation = '';
+        });
+    }
 });
 
 // Smooth scroll for navigation links
@@ -55,10 +81,12 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         const targetId = this.getAttribute('href');
         const targetElement = document.querySelector(targetId);
         
-        window.scrollTo({
-            top: targetElement.offsetTop - 70,
-            behavior: 'smooth'
-        });
+        if (targetElement) {
+            window.scrollTo({
+                top: targetElement.offsetTop - 70,
+                behavior: 'smooth'
+            });
+        }
     });
 });
 
